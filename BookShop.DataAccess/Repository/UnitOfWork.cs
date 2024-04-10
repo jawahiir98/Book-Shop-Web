@@ -11,16 +11,16 @@ namespace BookShop.DataAccess.Repository
     public class UnitOfWork : IUnitOfWork
     {
 
-        public ICategoryRepository Category {get; private set;}
+        public ICategoryRepository Categories {get; private set;}
 
-        public IProductRepository Product {get; private set;}
+        public IProductRepository Products {get; private set;}
 
         private readonly ApplicationDbContext _db;
         public UnitOfWork(ApplicationDbContext db)
         {
             _db = db;
-            Category = new CategoryRepository(_db);
-            Product = new ProductRepository(_db);
+            Categories = new CategoryRepository(_db);
+            Products = new ProductRepository(_db);
         }
 
         public void Save()
