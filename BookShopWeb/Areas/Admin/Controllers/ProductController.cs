@@ -22,27 +22,19 @@ namespace BookShopWeb.Areas.Admin.Controllers
 
         public IActionResult Upsert(int? id)
         {
-            Product prod;
-            if (id != 0)
+            Product product = new Product();
+            if (id == null || id == 0)
             {
-                prod = unitOfWork.Products.Get(u => u.Id == id);
-                return View(prod);
+                return View(product);
             }
-            prod = new Product(){
-                Title = "",
-                Description = "",
-                ISBN = "",
-                Author = "",
-                Id = 0,
-                ListPrice = 0,
-                Price = 0,
-                Price50 = 0,
-                Price100 = 0,
-            };
-            return View(prod);
+            else
+            {
+                product = unitOfWork.Products.Get(u => u.Id == id);
+                return View(product);
+            }
         }
         [HttpPost]
-        public IActionResult Upsert(Product product)
+        public IActionResult Upsert(Product product,IFormFile? file)
         {
             if (product.Id == 0)
             {
