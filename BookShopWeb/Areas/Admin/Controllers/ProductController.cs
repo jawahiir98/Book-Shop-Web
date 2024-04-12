@@ -1,6 +1,9 @@
-﻿using BookShop.DataAccess.Repository.IRepository;
+﻿using BookShop.DataAccess.Repository;
+using BookShop.DataAccess.Repository.IRepository;
 using BookShop.Models;
+using BookShop.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Reflection;
 
 namespace BookShopWeb.Areas.Admin.Controllers
@@ -17,33 +20,42 @@ namespace BookShopWeb.Areas.Admin.Controllers
         public IActionResult Index()
         {
             List<Product> productList = unitOfWork.Products.GetAll().ToList();
+            
             return View(productList);
         }
 
         public IActionResult Upsert(int? id)
         {
-            Product product = new Product();
+            ProductVM pvm = new()
+            {
+                CategoryList = unitOfWork.Categories.GetAll().Select(u => new SelectListItem
+                {
+                    Text = u.Name,
+                    Value = u.Id.ToString()
+                }),
+                Product = new Product()
+            };
             if (id == null || id == 0)
             {
-                return View(product);
+                return View(pvm);
             }
             else
             {
-                product = unitOfWork.Products.Get(u => u.Id == id);
-                return View(product);
+                pvm.Product = unitOfWork.Products.Get(u => u.Id == id);
+                return View(pvm);
             }
         }
         [HttpPost]
-        public IActionResult Upsert(Product product,IFormFile? file)
+        public IActionResult Upsert(ProductVM productvm,IFormFile? file)
         {
-            if (product.Id == 0)
+            if (productvm.Product.Id == 0)
             {
-                unitOfWork.Products.Add(product);
+                unitOfWork.Products.Add(productvm.Product);
                 TempData["success"] = "Product added succesfully";
             }
             else 
             {
-                unitOfWork.Products.Update(product);
+                unitOfWork.Products.Update(productvm.Product);
                 TempData["success"] = "Product update succesfully";
             }
             unitOfWork.Save();
