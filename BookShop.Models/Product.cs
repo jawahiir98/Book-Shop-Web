@@ -25,9 +25,9 @@ namespace BookShop.Models
         public double Price50 { get; set; }
         [Required]
         public double Price100 { get; set; }
-
         public int CategoryId { get; set; }
         [ForeignKey("CategoryId")]
+        [Display(Name = "Category")]
         [ValidateNever]
         public Category Category { get; set; }
         [ValidateNever]
