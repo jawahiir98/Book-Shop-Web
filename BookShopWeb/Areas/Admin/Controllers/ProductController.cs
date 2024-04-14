@@ -22,7 +22,7 @@ namespace BookShopWeb.Areas.Admin.Controllers
 
         public IActionResult Index()
         {
-            List<Product> productList = unitOfWork.Products.GetAll().ToList();
+            List<Product> productList = unitOfWork.Products.GetAll(includeProperties:"Category").ToList();
             
             return View(productList);
         }
@@ -95,7 +95,7 @@ namespace BookShopWeb.Areas.Admin.Controllers
             }
             else
             {
-                productvm.CategoryList = unitOfWork.Categories.GetAll().Select(u => new SelectListItem
+                productvm.CategoryList = unitOfWork.Categories.GetAll(includeProperties: "Category").Select(u => new SelectListItem
                 {
                     Text = u.Name,
                     Value = u.Id.ToString()
@@ -103,24 +103,20 @@ namespace BookShopWeb.Areas.Admin.Controllers
                 return View(productvm);
             }
         }
-        public IActionResult Delete(int? id)
-        {
-            if (id == 0 || id == null) return NotFound();
-            Product product = unitOfWork.Products.Get(u => u.Id == id);
-            if (product == null) return NotFound();
-            return View(product);
-        }
-        [HttpPost, ActionName("Delete")]
-        public IActionResult DeletePost(int? id)
-        {
-            if (id == null || id == 0) return NotFound();
-            Product prod = unitOfWork.Products.Get(u => u.Id == id);
-            if (prod == null) return NotFound();
 
-            unitOfWork.Products.Remove(prod);
-            unitOfWork.Save();
-            TempData["success"] = "Product deleted successfully.";
-            return RedirectToAction("Index");
+        #region API CALLS
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            List<Product> productList = unitOfWork.Products.GetAll(includeProperties: "Category").ToList();
+            return Json(new {data = productList});
         }
+        [HttpDelete]
+        public IActionResult Delete()
+        {
+            return View();
+        }
+        #endregion
     }
 }
