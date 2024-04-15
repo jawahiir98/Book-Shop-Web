@@ -2,6 +2,7 @@
 using BookShop.DataAccess.Repository.IRepository;
 using BookShop.Models;
 using BookShop.Models.ViewModels;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Reflection;
@@ -113,9 +114,21 @@ namespace BookShopWeb.Areas.Admin.Controllers
             return Json(new {data = productList});
         }
         [HttpDelete]
-        public IActionResult Delete()
+        public IActionResult Delete(int? id)
         {
-            return View();
+            var obj = unitOfWork.Products.Get(u => u.Id == id);
+            if (obj == null) return Json(new { success = false, message ="Error while deleting." });
+
+            string wwwRootPath = webHostEnvironment.WebRootPath;
+            string oldImagePath = Path.Combine(wwwRootPath, obj.ImageUrl.TrimStart('\\'));
+
+            if (System.IO.File.Exists(oldImagePath))
+            {
+                System.IO.File.Delete(oldImagePath);
+            }
+            unitOfWork.Products.Remove(obj);
+            unitOfWork.Save();
+            return Json(new { success = true, message = "Successfully deleted." });
         }
         #endregion
     }
