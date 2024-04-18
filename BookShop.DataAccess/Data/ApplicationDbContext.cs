@@ -13,6 +13,7 @@ namespace BookShop.DataAccess.Data
         }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<Company> Companies { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -47,6 +48,38 @@ namespace BookShop.DataAccess.Data
                     Id = 5,
                     Name = "Misc.",
                     DisplayOrder = 5
+                }
+            );
+            modelBuilder.Entity<Company>().HasData(
+                new Company
+                {
+                    Id = 1,
+                    Name = "Galaxy Tech",
+                    StreetAddress = "Gulshan Street 01",
+                    State = "Gulshan",
+                    City = "Dhaka",
+                    PostalCode = "10001",
+                    PhoneNumber = "+09 10001"
+                },
+                new Company
+                {
+                    Id = 2,
+                    Name = "Solu Solu Solutions",
+                    StreetAddress = "Banani Street 01",
+                    State = "Banani",
+                    City = "Dhaka",
+                    PostalCode = "10002",
+                    PhoneNumber = "+09 10002"
+                },
+                new Company
+                {
+                    Id = 3,
+                    Name = "ThirtyThree Labs",
+                    StreetAddress = "Uttara Street 01",
+                    State = "Uttara",
+                    City = "Dhaka",
+                    PostalCode = "10003",
+                    PhoneNumber = "+09 10003"
                 }
             );
             modelBuilder.Entity<Product>().HasData(

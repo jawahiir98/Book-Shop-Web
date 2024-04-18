@@ -4,6 +4,7 @@ using BookShop.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookShop.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240418095356_addCompanyTableToDb")]
+    partial class addCompanyTableToDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,9 +92,6 @@ namespace BookShop.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("PostalCode")
                         .HasColumnType("nvarchar(max)");
 
@@ -104,38 +104,6 @@ namespace BookShop.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Companies");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            City = "Dhaka",
-                            Name = "Galaxy Tech",
-                            PhoneNumber = "+09 10001",
-                            PostalCode = "10001",
-                            State = "Gulshan",
-                            StreetAddress = "Gulshan Street 01"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            City = "Dhaka",
-                            Name = "Solu Solu Solutions",
-                            PhoneNumber = "+09 10002",
-                            PostalCode = "10002",
-                            State = "Banani",
-                            StreetAddress = "Banani Street 01"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            City = "Dhaka",
-                            Name = "ThirtyThree Labs",
-                            PhoneNumber = "+09 10003",
-                            PostalCode = "10003",
-                            State = "Uttara",
-                            StreetAddress = "Uttara Street 01"
-                        });
                 });
 
             modelBuilder.Entity("BookShop.Models.Product", b =>
