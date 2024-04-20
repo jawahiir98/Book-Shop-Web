@@ -1,9 +1,11 @@
 ﻿
 using BookShop.DataAccess.Repository.IRepository;
 using BookShop.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace BookShopWeb.Areas.Customer.Controllers
 {
@@ -24,8 +26,25 @@ namespace BookShopWeb.Areas.Customer.Controllers
         }
         public IActionResult Details(int id)
         {
-            Product product = unitOfWork.Products.Get(u => u.Id == id, includeProperties: "Category");
-            return View(product);
+            ShoppingCart cart = new() {
+                Product = unitOfWork.Products.Get(u => u.Id == id, includeProperties: "Category"),
+                Count = 1,
+                ProductId = id
+            };
+            return View(cart);
+        }
+        [HttpPost]
+        [Authorize]
+        public IActionResult Details(ShoppingCart cart)
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            cart.ApplicationUserId = userId;
+            unitOfWork.ShoppingCarts.Add(cart);
+            unitOfWork.Save();
+
+            return RedirectToAction(nameof(Index));
         }
 
         public IActionResult Privacy()
