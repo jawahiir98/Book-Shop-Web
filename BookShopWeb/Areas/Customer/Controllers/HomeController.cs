@@ -26,17 +26,21 @@ namespace BookShopWeb.Areas.Customer.Controllers
         }
         public IActionResult Details(int id)
         {
-            ShoppingCart cart = new() {
+            ShoppingCart cart = new ShoppingCart()
+            {
                 Product = unitOfWork.Products.Get(u => u.Id == id, includeProperties: "Category"),
                 Count = 1,
                 ProductId = id
             };
             return View(cart);
         }
+
         [HttpPost]
         [Authorize]
         public IActionResult Details(ShoppingCart cart)
         {
+            //cart.Id = 0;
+
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
@@ -46,6 +50,7 @@ namespace BookShopWeb.Areas.Customer.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
 
         public IActionResult Privacy()
         {

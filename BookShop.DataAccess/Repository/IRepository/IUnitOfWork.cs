@@ -9,10 +9,11 @@ namespace BookShop.DataAccess.Repository.IRepository
     public interface IUnitOfWork
     {
         IApplicationUserRepository ApplicationUsers { get; }
+        IShoppingCartRepository ShoppingCarts { get; }
         ICategoryRepository Categories {get;}
         IProductRepository Products { get;}
         ICompanyRepository Companies{ get;}
-        IShoppingCartRepository ShoppingCarts { get;}
+        
         void Save();
     }
 }
