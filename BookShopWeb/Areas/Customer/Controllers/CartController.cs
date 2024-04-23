@@ -2,6 +2,7 @@
 using BookShop.DataAccess.Repository.IRepository;
 using BookShop.Models;
 using BookShop.Models.ViewModels;
+using BookShop.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -13,6 +14,7 @@ namespace BookShopWeb.Areas.Customer.Controllers
     public class CartController : Controller
     {
         private readonly IUnitOfWork unitOfWork;
+        [BindProperty]
         public ShoppingCartVM CartVM { get; set; }
         public CartController(IUnitOfWork _unitOfWork)
         {
@@ -76,8 +78,62 @@ namespace BookShopWeb.Areas.Customer.Controllers
 
             return View(CartVM);
         }
+		[HttpPost]
+		[ActionName("Summary")]
+		public IActionResult SummaryPOST()
+		{
+			var claimsIdentity = (ClaimsIdentity)User.Identity;
+			var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-        public IActionResult Plus(int CartId)
+            CartVM.ShoppingCartList = unitOfWork.ShoppingCarts.GetAll(
+                u => u.ApplicationUserId == userId,
+                includeProperties: "Product"
+             );
+
+			CartVM.OrderHeader.OrderDate = System.DateTime.Now;
+			CartVM.OrderHeader.ApplicationUserId = userId;
+
+			CartVM.OrderHeader.ApplicationUser = unitOfWork.ApplicationUsers.Get(u => u.Id == userId);
+            
+
+			foreach (var cart in CartVM.ShoppingCartList)
+			{
+				cart.Price = GetPriceBasedOnQuantity(cart);
+				CartVM.OrderHeader.OrderTotal += cart.Price * cart.Count;
+			}
+
+            if(CartVM.OrderHeader.ApplicationUser.CompanyId.GetValueOrDefault() == 0)
+            {
+                // Customer order management process 
+                CartVM.OrderHeader.OrderStatus = SD.StatusPending;
+                CartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
+            }
+            else
+            {
+                // Company order management process
+				CartVM.OrderHeader.OrderStatus = SD.StatusApproved;
+				CartVM.OrderHeader.PaymentStatus = SD.PaymentStatusDelayedPayment;
+			}
+
+            unitOfWork.OrderHeaders.Add(CartVM.OrderHeader);
+            unitOfWork.Save();
+
+            foreach(var cart in CartVM.ShoppingCartList)
+            {
+                OrderDetail orderDetail = new()
+                {
+                    ProductId = cart.ProductId,
+                    OrderHeaderId = CartVM.OrderHeader.Id,
+                    Price = cart.Price,
+                    Count = cart.Count
+                };
+                unitOfWork.OrderDetails.Add(orderDetail);
+                unitOfWork.Save();
+            }
+
+			return View(CartVM);
+		}
+		public IActionResult Plus(int CartId)
         {
             var cartFromDb = unitOfWork.ShoppingCarts.Get(u => u.Id ==  CartId);
             cartFromDb.Count += 1;
