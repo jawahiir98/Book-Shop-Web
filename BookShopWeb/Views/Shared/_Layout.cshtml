@@ -44,12 +44,18 @@
                                     <li class="nav-item">
                                         <a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index"> Product </a>
                                     </li>
-                                <li class="nav-item">
-                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Company" asp-action="Index"> Company </a>
-                                </li>
+                                    <li class="nav-item">
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Company" asp-action="Index"> Company </a>
+                                    </li>
                                 </ul>
                             </li>
+                            
                         @* } *@
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Customer" asp-controller="Cart" asp-action="Index">
+                                <i class="bi bi-cart"></i> &nbsp;(0)
+                            </a>
+                        </li>
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>
@@ -65,7 +71,7 @@
 
     <footer class="border-top footer text-muted bg-primary">
         <div class="container text-center text-white">
-            <i class="bi bi-cart"></i> Web Application
+            Made with <i class="bi bi-heart"></i> by Jawahiir
         </div>
     </footer>
 

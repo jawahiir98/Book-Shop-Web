@@ -45,9 +45,24 @@ namespace BookShopWeb.Areas.Customer.Controllers
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
             cart.ApplicationUserId = userId;
-            unitOfWork.ShoppingCarts.Add(cart);
-            unitOfWork.Save();
 
+            ShoppingCart shoppingCart = unitOfWork.ShoppingCarts.Get(u =>
+            u.ApplicationUserId == cart.ApplicationUserId &&
+            u.ProductId == cart.ProductId
+            );
+            if(shoppingCart != null)
+            {
+                // Cart already exists for the product..So we just update the existing one.
+                shoppingCart.Count += cart.Count;
+                unitOfWork.ShoppingCarts.Update(shoppingCart);
+            }
+            else
+            {
+                unitOfWork.ShoppingCarts.Add(cart);
+            }
+
+            unitOfWork.Save();
+            TempData["success"] = "Cart added successfully.";
             return RedirectToAction(nameof(Index));
         }
 

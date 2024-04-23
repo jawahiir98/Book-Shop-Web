@@ -21,7 +21,6 @@ namespace BookShopWeb.Areas.Admin.Controllers
         {
             unitOfWork = _unitOfWork;
             webHostEnvironment = _webHostEnvironment;
-
         }
 
         public IActionResult Index()
