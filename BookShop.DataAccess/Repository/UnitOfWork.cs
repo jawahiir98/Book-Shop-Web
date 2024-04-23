@@ -17,6 +17,8 @@ namespace BookShop.DataAccess.Repository
         public IProductRepository Products { get; private set; }
         public IShoppingCartRepository ShoppingCarts { get; private set; }
         public IApplicationUserRepository ApplicationUsers { get; private set; }
+        public IOrderHeaderRepository OrderHeaders { get; private set; }
+        public IOrderDetailRepository OrderDetails { get; private set; }
 
         private readonly ApplicationDbContext _db;
         public UnitOfWork(ApplicationDbContext db)
@@ -27,6 +29,8 @@ namespace BookShop.DataAccess.Repository
             Categories = new CategoryRepository(_db);
             Products = new ProductRepository(_db);
             Companies = new CompanyRepository(_db);
+            OrderHeaders = new OrderHeaderRepository(_db);
+            OrderDetails = new OrderDetailRepository(_db);
         }
 
         public void Save()
