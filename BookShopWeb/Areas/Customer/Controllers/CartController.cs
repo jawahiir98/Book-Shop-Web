@@ -5,6 +5,8 @@ using BookShop.Models.ViewModels;
 using BookShop.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Stripe.Checkout;
 using System.Security.Claims;
 
 namespace BookShopWeb.Areas.Customer.Controllers
@@ -78,31 +80,31 @@ namespace BookShopWeb.Areas.Customer.Controllers
 
             return View(CartVM);
         }
-		[HttpPost]
-		[ActionName("Summary")]
-		public IActionResult SummaryPOST()
-		{
-			var claimsIdentity = (ClaimsIdentity)User.Identity;
-			var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+        [HttpPost]
+        [ActionName("Summary")]
+        public IActionResult SummaryPOST()
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
             CartVM.ShoppingCartList = unitOfWork.ShoppingCarts.GetAll(
                 u => u.ApplicationUserId == userId,
                 includeProperties: "Product"
              );
 
-			CartVM.OrderHeader.OrderDate = System.DateTime.Now;
-			CartVM.OrderHeader.ApplicationUserId = userId;
+            CartVM.OrderHeader.OrderDate = System.DateTime.Now;
+            CartVM.OrderHeader.ApplicationUserId = userId;
 
-			ApplicationUser appUser = unitOfWork.ApplicationUsers.Get(u => u.Id == userId);
-            
+            ApplicationUser appUser = unitOfWork.ApplicationUsers.Get(u => u.Id == userId);
 
-			foreach (var cart in CartVM.ShoppingCartList)
-			{
-				cart.Price = GetPriceBasedOnQuantity(cart);
-				CartVM.OrderHeader.OrderTotal += cart.Price * cart.Count;
-			}
 
-            if(appUser.CompanyId.GetValueOrDefault() == 0)
+            foreach (var cart in CartVM.ShoppingCartList)
+            {
+                cart.Price = GetPriceBasedOnQuantity(cart);
+                CartVM.OrderHeader.OrderTotal += cart.Price * cart.Count;
+            }
+
+            if (appUser.CompanyId.GetValueOrDefault() == 0)
             {
                 // Customer order management process 
                 CartVM.OrderHeader.OrderStatus = SD.StatusPending;
@@ -111,14 +113,14 @@ namespace BookShopWeb.Areas.Customer.Controllers
             else
             {
                 // Company order management process
-				CartVM.OrderHeader.OrderStatus = SD.StatusApproved;
-				CartVM.OrderHeader.PaymentStatus = SD.PaymentStatusDelayedPayment;
-			}
+                CartVM.OrderHeader.OrderStatus = SD.StatusApproved;
+                CartVM.OrderHeader.PaymentStatus = SD.PaymentStatusDelayedPayment;
+            }
 
             unitOfWork.OrderHeaders.Add(CartVM.OrderHeader);
             unitOfWork.Save();
 
-            foreach(var cart in CartVM.ShoppingCartList)
+            foreach (var cart in CartVM.ShoppingCartList)
             {
                 OrderDetail orderDetail = new()
                 {
@@ -131,19 +133,51 @@ namespace BookShopWeb.Areas.Customer.Controllers
                 unitOfWork.Save();
             }
 
-            if(appUser.CompanyId.GetValueOrDefault() == 0)
+            if (appUser.CompanyId.GetValueOrDefault() == 0)
             {
                 // Strie logic, customer user
+                var domain = "https://localhost:7058/";
+                var options = new SessionCreateOptions
+                {
+                    SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={CartVM.OrderHeader.Id}",
+                    CancelUrl = domain + "customer/cart/index",
+                    LineItems = new List<SessionLineItemOptions>(),
+                    Mode = "payment",
+                };
+                foreach (var item in CartVM.ShoppingCartList)
+                {
+                    var sessionLineItem = new SessionLineItemOptions
+                    {
+                        PriceData = new SessionLineItemPriceDataOptions
+                        {
+                            UnitAmount = (long)(item.Price * 100), // $ 20.50 = 2050
+                            Currency = "usd",
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = item.Product.Title
+                            }
+                        },
+                        Quantity = item.Count
+                    };
+                    options.LineItems.Add(sessionLineItem);
+                }
+                var service = new SessionService();
+                Session session = service.Create(options);
+                unitOfWork.OrderHeaders.UpdateStripePaymentId(CartVM.OrderHeader.Id,session.Id, session.PaymentIntentId);
+                unitOfWork.Save();
+                Response.Headers.Add("Location", session.Url);
+                return new StatusCodeResult(303);
             }
+            
             return RedirectToAction(nameof(OrderConfirmation), new { id = CartVM.OrderHeader.Id });
-		}
+        }
         public IActionResult OrderConfirmation(int id)
         {
             return View(id);
         }
-		public IActionResult Plus(int CartId)
+        public IActionResult Plus(int CartId)
         {
-            var cartFromDb = unitOfWork.ShoppingCarts.Get(u => u.Id ==  CartId);
+            var cartFromDb = unitOfWork.ShoppingCarts.Get(u => u.Id == CartId);
             cartFromDb.Count += 1;
             unitOfWork.ShoppingCarts.Update(cartFromDb);
             unitOfWork.Save();
@@ -153,7 +187,7 @@ namespace BookShopWeb.Areas.Customer.Controllers
         public IActionResult Minus(int CartId)
         {
             var cartFromDb = unitOfWork.ShoppingCarts.Get(u => u.Id == CartId);
-            if(cartFromDb.Count <= 1)
+            if (cartFromDb.Count <= 1)
             {
                 unitOfWork.ShoppingCarts.Remove(cartFromDb);
             }
