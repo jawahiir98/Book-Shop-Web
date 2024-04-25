@@ -15,3 +15,6 @@ III. Company : Special type of customer who does not require to pay immediately.
 5. MVC, N-Tier Architecture [Model, Data Access, Presentation & Utility]
 6. Shopping Cart
 7. Special User ( Company )
+8. Make orders
+9. Stripe payment
+10. Order management
