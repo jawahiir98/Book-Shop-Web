@@ -1,7 +1,9 @@
 ﻿using BookShop.DataAccess.Repository.IRepository;
 using BookShop.Models;
+using BookShop.Utility;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace BookShopWeb.Areas.Admin.Controllers
 {
@@ -20,9 +22,28 @@ namespace BookShopWeb.Areas.Admin.Controllers
         #region API CALLS
 
         [HttpGet]
-        public IActionResult GetAll()
+        public IActionResult GetAll(string status)
         {
-            List<OrderHeader> orderHeaderList = unitOfWork.OrderHeaders.GetAll(includeProperties: "ApplicationUser").ToList();
+            IEnumerable<OrderHeader> orderHeaderList = unitOfWork.OrderHeaders.GetAll(includeProperties: "ApplicationUser").ToList();
+
+            switch (status)
+            {
+                case "inprocess":
+                    orderHeaderList = orderHeaderList.Where(u => u.PaymentStatus == SD.StatusInProcess);
+                    break;
+                case "pending":
+                    orderHeaderList = orderHeaderList.Where(u => u.PaymentStatus == SD.PaymentStatusDelayedPayment);
+                    break;
+                case "approved":
+                    orderHeaderList = orderHeaderList.Where(u => u.PaymentStatus == SD.StatusApproved);
+                    break;
+                case "completed":
+                    orderHeaderList = orderHeaderList.Where(u => u.PaymentStatus == SD.StatusShipped);
+                    break;
+                default:
+                    break;
+            }
+
             return Json(new { data = orderHeaderList });
         }
         #endregion
