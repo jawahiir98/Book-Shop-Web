@@ -173,6 +173,24 @@ namespace BookShopWeb.Areas.Customer.Controllers
         }
         public IActionResult OrderConfirmation(int id)
         {
+            OrderHeader orderHeader = unitOfWork.OrderHeaders.Get(u => u.Id == id, includeProperties:"ApplicationUser");
+            if(orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
+            {
+                // The order belongs to a customer user.
+                var service = new SessionService();
+                Session session = service.Get(orderHeader.SessionId);
+                if(session.PaymentStatus.ToLower() == "paid")
+                {
+                    unitOfWork.OrderHeaders.UpdateStripePaymentId(id, session.Id, session.PaymentIntentId);
+                    unitOfWork.OrderHeaders.UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved);
+                    unitOfWork.Save();
+                }
+            }
+            List<ShoppingCart> shoppingCarts = unitOfWork.ShoppingCarts.GetAll(
+                    u => u.ApplicationUserId == orderHeader.ApplicationUserId
+                ).ToList();
+            unitOfWork.ShoppingCarts.RemoveRange(shoppingCarts);
+            unitOfWork.Save();
             return View(id);
         }
         public IActionResult Plus(int CartId)
