@@ -229,12 +229,13 @@ namespace BookShopWeb.Areas.Customer.Controllers
         {
             var cartFromDb = unitOfWork.ShoppingCarts.Get(u => u.Id == CartId);
 
+            unitOfWork.ShoppingCarts.Remove(cartFromDb);
+
             HttpContext.Session.SetInt32(
                 SD.SessionCart,
                 unitOfWork.ShoppingCarts.GetAll(u => u.ApplicationUserId == cartFromDb.ApplicationUserId).Count() - 1
             );
 
-            unitOfWork.ShoppingCarts.Remove(cartFromDb);
             unitOfWork.Save();
 
             return RedirectToAction(nameof(Index));
