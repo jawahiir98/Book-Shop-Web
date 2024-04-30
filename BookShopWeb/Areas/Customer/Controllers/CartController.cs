@@ -191,6 +191,7 @@ namespace BookShopWeb.Areas.Customer.Controllers
                 ).ToList();
             unitOfWork.ShoppingCarts.RemoveRange(shoppingCarts);
             unitOfWork.Save();
+
             return View(id);
         }
         public IActionResult Plus(int CartId)
@@ -208,6 +209,11 @@ namespace BookShopWeb.Areas.Customer.Controllers
             if (cartFromDb.Count <= 1)
             {
                 unitOfWork.ShoppingCarts.Remove(cartFromDb);
+
+                HttpContext.Session.SetInt32(
+                    SD.SessionCart,
+                    unitOfWork.ShoppingCarts.GetAll(u => u.ApplicationUserId == cartFromDb.ApplicationUserId).Count() -1
+                );
             }
             else
             {
@@ -222,6 +228,12 @@ namespace BookShopWeb.Areas.Customer.Controllers
         public IActionResult Remove(int CartId)
         {
             var cartFromDb = unitOfWork.ShoppingCarts.Get(u => u.Id == CartId);
+
+            HttpContext.Session.SetInt32(
+                SD.SessionCart,
+                unitOfWork.ShoppingCarts.GetAll(u => u.ApplicationUserId == cartFromDb.ApplicationUserId).Count() - 1
+            );
+
             unitOfWork.ShoppingCarts.Remove(cartFromDb);
             unitOfWork.Save();
 

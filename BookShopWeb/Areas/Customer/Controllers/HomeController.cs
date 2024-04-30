@@ -1,6 +1,8 @@
 ﻿
+using BookShop.DataAccess.Repository;
 using BookShop.DataAccess.Repository.IRepository;
 using BookShop.Models;
+using BookShop.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
@@ -21,6 +23,14 @@ namespace BookShopWeb.Areas.Customer.Controllers
         }
         public IActionResult Index()
         {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (claim != null)
+            {
+                HttpContext.Session.SetInt32(SD.SessionCart,
+                unitOfWork.ShoppingCarts.GetAll(u => u.ApplicationUserId == claim.Value).Count());
+            }
             IEnumerable<Product> productList = unitOfWork.Products.GetAll(includeProperties: "Category").ToList();
             return View(productList);
         }
@@ -46,22 +56,27 @@ namespace BookShopWeb.Areas.Customer.Controllers
 
             cart.ApplicationUserId = userId;
 
-            ShoppingCart shoppingCart = unitOfWork.ShoppingCarts.Get(u =>
-            u.ApplicationUserId == cart.ApplicationUserId &&
-            u.ProductId == cart.ProductId
+            ShoppingCart shoppingCart = unitOfWork.ShoppingCarts.Get(
+                u => u.ApplicationUserId == cart.ApplicationUserId &&
+                u.ProductId == cart.ProductId
             );
             if(shoppingCart != null)
             {
                 // Cart already exists for the product..So we just update the existing one.
                 shoppingCart.Count += cart.Count;
                 unitOfWork.ShoppingCarts.Update(shoppingCart);
+                unitOfWork.Save();
             }
             else
             {
                 unitOfWork.ShoppingCarts.Add(cart);
+                unitOfWork.Save();
+                HttpContext.Session.SetInt32(
+                    SD.SessionCart, 
+                    unitOfWork.ShoppingCarts.GetAll(u => u.ApplicationUserId == cart.ApplicationUserId).Count()
+                );
             }
 
-            unitOfWork.Save();
             TempData["success"] = "Cart added successfully.";
             return RedirectToAction(nameof(Index));
         }
