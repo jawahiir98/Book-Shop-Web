@@ -23,14 +23,6 @@ namespace BookShopWeb.Areas.Customer.Controllers
         }
         public IActionResult Index()
         {
-            var claimsIdentity = (ClaimsIdentity)User.Identity;
-            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
-
-            if (claim != null)
-            {
-                HttpContext.Session.SetInt32(SD.SessionCart,
-                unitOfWork.ShoppingCarts.GetAll(u => u.ApplicationUserId == claim.Value).Count());
-            }
             IEnumerable<Product> productList = unitOfWork.Products.GetAll(includeProperties: "Category").ToList();
             return View(productList);
         }
