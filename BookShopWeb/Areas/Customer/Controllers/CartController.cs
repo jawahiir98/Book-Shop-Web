@@ -191,7 +191,7 @@ namespace BookShopWeb.Areas.Customer.Controllers
                 ).ToList();
             unitOfWork.ShoppingCarts.RemoveRange(shoppingCarts);
             unitOfWork.Save();
-
+            HttpContext.Session.Clear();
             return View(id);
         }
         public IActionResult Plus(int CartId)

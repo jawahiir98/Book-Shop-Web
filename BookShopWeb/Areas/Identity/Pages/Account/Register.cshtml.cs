@@ -211,7 +211,17 @@ namespace BookShopWeb.Areas.Identity.Pages.Account
                     }
                     else
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        if (User.IsInRole(SD.Role_Admin))
+                        {
+                            string userType = "";
+                            if (Input.Role == SD.Role_Customer) userType = "Customer";
+                            else if (Input.Role == SD.Role_Employee) userType = "Employee";
+                            else if (Input.Role == SD.Role_Company) userType = "Company";
+                            TempData["success"] = userType + "-user created successfully";
+                        }
+                        else { 
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+                        }
                         return LocalRedirect(returnUrl);
                     }
                 }
