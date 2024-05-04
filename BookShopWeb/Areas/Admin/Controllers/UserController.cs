@@ -51,7 +51,28 @@ namespace BookShopWeb.Areas.Admin.Controllers
             }
             return Json(new {data = userList});
         }
-       
+        [HttpPost]
+        public IActionResult LockUnlock([FromBody] string id)
+        {
+
+            var objFromDb = db.ApplicationUsers.FirstOrDefault(u => u.Id == id);
+            if (objFromDb == null)
+            {
+                return Json(new { success = false, message = "Error while Locking/Unlocking" });
+            }
+
+            if (objFromDb.LockoutEnd != null && objFromDb.LockoutEnd > DateTime.Now)
+            {
+                //The user's lock period has ended.
+                objFromDb.LockoutEnd = DateTime.Now;
+            }
+            else
+            {
+                objFromDb.LockoutEnd = DateTime.Now.AddMonths(24);
+            }
+            db.SaveChanges();
+            return Json(new { success = true, message = "Operation Successful" });
+        }
 
         #endregion
     }
