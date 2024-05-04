@@ -58,7 +58,8 @@ namespace BookShop.DataAccess.DbInitializer
                     StreetAddress = "Fire Fist",
                     State = "Real Saw",
                     PostalCode = "12312",
-                    City = "Porselin"
+                    City = "Porselin",
+                    
                 }, "Admin123!").GetAwaiter().GetResult();
 
 
