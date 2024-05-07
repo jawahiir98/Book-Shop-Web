@@ -12,6 +12,7 @@ namespace BookShop.DataAccess.Repository.IRepository
         IShoppingCartRepository ShoppingCarts { get; }
         ICategoryRepository Categories {get;}
         IProductRepository Products { get;}
+        IProductImageRepository ProductImages { get;}
         ICompanyRepository Companies{ get;}
         IOrderHeaderRepository OrderHeaders { get;}
         IOrderDetailRepository OrderDetails { get;}

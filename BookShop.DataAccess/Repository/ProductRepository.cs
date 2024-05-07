@@ -31,10 +31,10 @@ namespace BookShop.DataAccess.Repository
                 obj.Price100 = product.Price100;
                 obj.Category = product.Category;
                 obj.CategoryId = product.CategoryId;
-                if(obj.ImageUrl != null)
-                {
-                    obj.ImageUrl = product.ImageUrl;
-                }
+                //if(obj.ImageUrl != null)
+                //{
+                //    obj.ImageUrl = product.ImageUrl;
+                //}
             }
         }
     }

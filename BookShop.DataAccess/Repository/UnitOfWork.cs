@@ -15,6 +15,7 @@ namespace BookShop.DataAccess.Repository
         public ICategoryRepository Categories { get; private set; }
         public ICompanyRepository Companies { get; private set; }
         public IProductRepository Products { get; private set; }
+        public IProductImageRepository ProductImages { get; private set; }
         public IShoppingCartRepository ShoppingCarts { get; private set; }
         public IApplicationUserRepository ApplicationUsers { get; private set; }
         public IOrderHeaderRepository OrderHeaders { get; private set; }
@@ -28,6 +29,7 @@ namespace BookShop.DataAccess.Repository
             ShoppingCarts = new ShoppingCartRepository(_db);
             Categories = new CategoryRepository(_db);
             Products = new ProductRepository(_db);
+            ProductImages = new ProductImageRepository(_db);    
             Companies = new CompanyRepository(_db);
             OrderHeaders = new OrderHeaderRepository(_db);
             OrderDetails = new OrderDetailRepository(_db);
