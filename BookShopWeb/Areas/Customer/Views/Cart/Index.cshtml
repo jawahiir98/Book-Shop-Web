@@ -28,6 +28,14 @@
                     {
                         <div class="row border-bottom pb-3">
                             <div class="d-none d-lg-block col-lg-1 text-center py-2">
+                                @if (item.Product.ProductImages != null && item.Product.ProductImages.Count() > 0)
+                                {
+                                    <img src="@item.Product.ProductImages.FirstOrDefault().ImageUrl" class="w-100 card-img-top rounded" />
+                                }
+                                else
+                                {
+                                    <img src="https://placehold.co/500x600/png" class="card-img-top rounded w-100" />
+                                }
                                @*  <img src="@item.Product.ImageUrl" class="rounded" width="100%" /> *@
                             </div>
                             <div class="col-12 col-lg-6 pt-md-3">

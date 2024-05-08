@@ -44,8 +44,12 @@ namespace BookShopWeb.Areas.Customer.Controllers
                 ),
                 OrderHeader = new()
             };
+
+            var productImages = unitOfWork.ProductImages.GetAll().ToList();
+
             foreach (var cart in CartVM.ShoppingCartList)
             {
+                cart.Product.ProductImages = productImages.Where(u=>u.ProductId == cart.ProductId).ToList();
                 cart.Price = GetPriceBasedOnQuantity(cart);
                 CartVM.OrderHeader.OrderTotal += cart.Price * cart.Count;
             }

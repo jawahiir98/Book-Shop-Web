@@ -23,14 +23,14 @@ namespace BookShopWeb.Areas.Customer.Controllers
         }
         public IActionResult Index()
         {
-            IEnumerable<Product> productList = unitOfWork.Products.GetAll(includeProperties: "Category").ToList();
+            IEnumerable<Product> productList = unitOfWork.Products.GetAll(includeProperties: "Category,ProductImages").ToList();
             return View(productList);
         }
         public IActionResult Details(int id)
         {
             ShoppingCart cart = new ShoppingCart()
             {
-                Product = unitOfWork.Products.Get(u => u.Id == id, includeProperties: "Category"),
+                Product = unitOfWork.Products.Get(u => u.Id == id, includeProperties: "Category,ProductImages"),
                 Count = 1,
                 ProductId = id
             };
